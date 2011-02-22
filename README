@@ -4,4 +4,4 @@ Install the app as usual, then setup a few tenants.
 
 Access the tenant specific dog lists either by subdomain, or by passing a `?tenant=` query string variable.
 
-A better explanation is at index.html
+A better explanation is at index.html 
