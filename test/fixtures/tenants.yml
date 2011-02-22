@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  subdomain: MyString
+  user_name: MyString
+
+two:
+  subdomain: MyString
+  user_name: MyString

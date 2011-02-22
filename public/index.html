@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Multitenant Application</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+        margin-bottom: 25px;
+        padding: 0;
+        background-color: #f0f0f0;
+        font-family: "monospace";
+        font-size: 13px;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 28px;
+        color: #000;
+      }
+
+      a  {color: #03c}
+      a:hover {
+        background-color: #03c;
+        color: white;
+        text-decoration: none;
+      }
+
+
+      #page {
+        background-color: #f0f0f0;
+        width: 750px;
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #content {
+        float: left;
+        background-color: white;
+        border: 3px solid #aaa;
+        border-top: none;
+        padding: 25px;
+        width: 500px;
+      }
+
+      #sidebar {
+        float: right;
+        width: 175px;
+      }
+
+      #footer {
+        clear: both;
+      }
+
+
+      #header, #about, #getting-started {
+        padding-left: 75px;
+        padding-right: 30px;
+      }
+
+
+      #header {
+        /*background-image: url("");*/
+        background-repeat: no-repeat;
+        background-position: top left;
+        height: 64px;
+      }
+      #header h1, #header h2 {margin: 0}
+      #header h2 {
+        color: #888;
+        font-weight: normal;
+        font-size: 16px;
+      }
+
+
+      #about h3 {
+        margin: 0;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      #about-content {
+        background-color: #ffd;
+        border: 1px solid #fc0;
+        margin-left: -55px;
+        margin-right: -10px;
+      }
+      #about-content table {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 11px;
+        border-collapse: collapse;
+      }
+      #about-content td {
+        padding: 10px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+      }
+      #about-content td.name  {color: #555}
+      #about-content td.value {color: #000}
+
+      #about-content ul {
+        padding: 0;
+        list-style-type: none;
+      }
+
+      #about-content.failure {
+        background-color: #fcc;
+        border: 1px solid #f00;
+      }
+      #about-content.failure p {
+        margin: 0;
+        padding: 10px;
+      }
+
+
+      #getting-started {
+        border-top: 1px solid #ccc;
+        margin-top: 25px;
+        padding-top: 15px;
+      }
+      #getting-started h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      #getting-started h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: normal;
+        color: #333;
+        margin-bottom: 25px;
+      }
+      #getting-started ol {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      #getting-started li {
+        font-size: 18px;
+        color: #888;
+        margin-bottom: 25px;
+      }
+      #getting-started li h2 {
+        margin: 0;
+        font-weight: normal;
+        font-size: 18px;
+        color: #333;
+      }
+      #getting-started li p {
+        color: #555;
+        font-size: 16px;
+      }
+
+
+      #sidebar ul {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      #sidebar ul h3 {
+        margin-top: 25px;
+        font-size: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+      }
+      #sidebar li {
+        list-style-type: none;
+      }
+      #sidebar ul.links li {
+        margin-bottom: 5px;
+      }
+
+      #header>img{
+        width:6em;
+        float: left;
+        margin-right: 1em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page">
+  
+      <div id="content">
+        <div id="header">
+        <img src="images/dapple_logo.png" alt="logo"/>
+          <h1>Multitenant Example Application</h1>
+          <h2> - Or - Abusing PostgreSQL Schemas</h2>
+        </div>
+
+        <div id="getting-started">
+          <h1>Getting started</h1>
+          <ol>
+            <li>
+              <h2>What's Here?</h2>
+              <p>This sample app has two models, a <code>tenants</code> model and a <code>dogs</code> model.  This sample app lets a pool of tenants each keep track of their dogs.  At dapple before dawn we have three dogs.  Sampson (st. Bernard), Maple (Bloodhoud) and Derby (Dachshund)</p>
+              <p>All of the <code>tenant</code> base actions have been abstracted into a plugin</p>
+            </li>
+
+            <li>
+              <h2>How to Use the Sample App?</h2>
+              <ul>
+                  <li>First setup your self a tenant at <code>tenants/new</code></li>
+                  <li>Second enter your tenant account, either by <code>myaccountsubdomain.myurl.com/dogs</code> or by passing the subdomain in the query string as <code>tenant</code></li>
+                  <li>Third create, some dogs at <code>dogs/new</code></li>
+                  <li>Finally, repeat steps 1~3 and marvel that the tenants data is not mixed!</li>
+              </ul>
+            </li>
+
+            <li>
+              <h2>TODO:</h2>
+              <ul>
+                  <li>It's acting as a global state-machine right now!  If one user sets the search path that path will apply to all users.  (Open it up in two browser windows, one with each tenant, then refresh the <code>/dogs</code> page for both tenants, without specifying the tenant in the params or subdomain.  You'll notice they both report the same data now. <p> I suspect this is because I made everything as a class method in PgActiveSchema.  I'll have to review how ActiveRecord does it.</p></li>
+                  <li>There are no tests!</li>
+                  <li>Some rake tasks to manage the plugin migrations and it's <code>schema.rb</code> would be nice.  I expect to mostly copy Guy</li>
+                  <li>I'm not crazy about that monkey patch in <code>pg_active_schema.rb</code></li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div id="footer">
+          Copyright - 22-Feb-2010 Mark J. Lorenz of Dapple Before Dawn ltd. <br/>
+          Released under an MIT License
+      </div>
+    </div>
+  </body>
+</html>
