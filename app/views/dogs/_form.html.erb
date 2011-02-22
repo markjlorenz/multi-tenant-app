@@ -1,4 +1,6 @@
 <%= form_for(@dog) do |f| %>
+  <!-- need to pass this param even with a form if you choose to do it the param way -->
+  <%= hidden_field '', :tenant, :value=>PgActiveSchema.current_schema %>
   <% if @dog.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@dog.errors.count, "error") %> prohibited this dog from being saved:</h2>
