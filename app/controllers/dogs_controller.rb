@@ -3,8 +3,11 @@ class DogsController < ApplicationController
 
   #set the tenant either through a get variable `tenant` or the subdomain
   def set_tenant
-    #PgActiveSchema.search_path = request.subdomain unless request.subdomain.blank?
-    PgActiveSchema.search_path = params[:tenant] unless params[:tenant].blank?
+     if !params[:tenant].blank?
+       PgActiveSchema.search_path = params[:tenant]
+     elsif !request.subdomain.blank?
+        PgActiveSchema.search_path = request.subdomain
+     end
   end
 
   def index
