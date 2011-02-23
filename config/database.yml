@@ -9,7 +9,7 @@ development:
   adapter: postgresql
   database: multitenant-development
   username: postgres
-  password: novirus
+  #password: yourpassword
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
