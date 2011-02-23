@@ -1,10 +1,5 @@
 class TenantsController < ApplicationController
-  before_filter :set_tenant
-
-  #set the tenant either through a get variable `tenant` or the subdomain
-  def set_tenant
-    PgActiveSchema.default_search_path
-  end
+  before_filter {PgActiveSchema.default_search_path}
 
   def index
     @tenants = Tenant.all

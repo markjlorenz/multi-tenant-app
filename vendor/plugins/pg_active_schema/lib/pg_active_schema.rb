@@ -1,3 +1,4 @@
+require 'active_record/connection_adapters/postgresql_adapter'
 #This module monkey patches the postgres adapter from rails v3.0.3, since table_exists? checks all existing tables, irreguardless of the
 #schema search path.  See:
 # https://rails.lighthouseapp.com/projects/8994/tickets/6457-disregard-for-schema-search-path-in-postgresql_adapterrb#ticket-6457-1

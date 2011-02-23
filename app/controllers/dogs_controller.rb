@@ -1,14 +1,6 @@
 class DogsController < ApplicationController
-  before_filter :set_tenant
-
-  #set the tenant either through a get variable `tenant` or the subdomain
-  def set_tenant
-     if !params[:tenant].blank?
-       PgActiveSchema.search_path = params[:tenant]
-     elsif !request.subdomain.blank?
-        PgActiveSchema.search_path = request.subdomain
-     end
-  end
+  before_filter {PgActiveSchema.search_path = current_tenant}
+  after_filter {PgActiveSchema.default_search_path}
 
   def index
     @dogs = Dog.all
@@ -53,7 +45,7 @@ class DogsController < ApplicationController
 
     respond_to do |format|
       if @dog.save
-        format.html { redirect_to(@dog, :notice => 'Dog was successfully created.') }
+        format.html { redirect_to(dog_path(@dog, :tenant=>current_tenant), :notice => 'Dog was successfully created.') }
         format.xml  { render :xml => @dog, :status => :created, :location => @dog }
       else
         format.html { render :action => "new" }
