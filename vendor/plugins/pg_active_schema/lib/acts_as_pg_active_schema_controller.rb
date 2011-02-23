@@ -8,11 +8,11 @@ module ActsAsPgActiveSchemaController
       raise ArgumentError, "Hash expected, got #{options.class.name}" if not options.is_a?(Hash) and not options.empty?
       send :include, InstanceMethods
 
-      rescue_from PgActiveSchema::NoSchema do |exception|
-        respond_to do |format|
-          format.html { redirect_to :controller=>:pg_active_schema_errors, :action=>:no_schema, :tenant=>current_tenant }
-        end
-      end
+#      rescue_from PgActiveSchema::NoSchema do |exception|
+#        respond_to do |format|
+#          format.html { redirect_to :controller=>:pg_active_schema_errors, :action=>:no_schema, :tenant=>current_tenant }
+#        end
+#      end
     end
   end
 
