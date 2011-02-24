@@ -1,0 +1,1 @@
+Dog.create(:name=>"Sampson", :size=>"Xtra First")
