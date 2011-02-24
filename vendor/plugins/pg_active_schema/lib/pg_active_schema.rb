@@ -30,9 +30,9 @@ module PostgresAdapterPatch
   end
 end
 
-
 class PgActiveSchema
   include PostgresAdapterPatch
+
   class NoSchema < StandardError; end
   class CreateSchemaError < StandardError
     attr_reader :search_path
@@ -115,6 +115,10 @@ class PgActiveSchema
       load(file)
     else
       abort %{#{file} vendor/plugins/pg_active_schema/db/schema.rb doesn't exist."}
+    end
+    file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/seeds.rb"
+    if File.exists?(file)
+      load(file)
     end
 
     restore_search_path
