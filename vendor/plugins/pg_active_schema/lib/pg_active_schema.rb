@@ -30,10 +30,26 @@ module PostgresAdapterPatch
   end
 end
 
+# this monkey patch is needed because the location of the migrations `db/migrate` is effectively hard coded into the rails source
+# Rails team has no intent of changing this: https://rails.lighthouseapp.com/projects/8994/tickets/343-assume_migrated_upto_version-doesn-t-work-with-non-standard-migrations-path
+# If I understand correctly, this alias won't be available outside of code that doesn't require the migration
+module SchemaStatementsPatch
+  ActiveRecord::Schema.class_eval do
+      class << self
+        alias_method :schema_unfriendly_migrations_path, :migrations_path
+        # File activerecord/lib/active_record/schema.rb, line 35
+        def migrations_path
+          'vendor/plugins/pg_active_schema/db/migrate'
+        end
+      end
+  end
+end
+
 class PgActiveSchema
   include PostgresAdapterPatch
-
+  include SchemaStatementsPatch
   class NoSchema < StandardError; end
+  class SchemaNotCreatedWithTenant < StandardError; end
   class CreateSchemaError < StandardError
     attr_reader :search_path
     def initialize(message = nil, search_path = nil)
@@ -49,12 +65,12 @@ class PgActiveSchema
     end
   end
 
-  
+
   def self.create_schema name
     begin
       ActiveRecord::Base.connection.execute("CREATE SCHEMA #{name}")
     rescue Exception => e
-      drop_schema name if list_schemata.include?(name) #dont' want a 1/2 finished schema hanging around
+      #drop_schema name if list_schemata.include?(name) #dont' want a 1/2 finished schema hanging around
       raise PgActiveSchema::CreateSchemaError.new(e.message, search_path)
     end
   end
@@ -78,7 +94,7 @@ class PgActiveSchema
   def self.current_schema
     ActiveRecord::Base.connection.query('select current_schema();')[0].first
   end
-  
+
   def self.search_path= name, include_public=false
     path_parts = [name, ("public" if include_public)].compact
     Rails.logger.info "--Setting search path to: " + path_parts.join(',')
@@ -86,9 +102,10 @@ class PgActiveSchema
       #this will throw `ActiveRecord::StatementInvalid` if the search path doesn't exist
       #http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/PostgreSQLAdapter.html#method-i-schema_search_path-3D
       #says not to call this directly, but internally it's doing the same thing I was going to do anyway
-      @prior_search_path = search_path
-      ActiveRecord::Base.connection.schema_search_path = path_parts.join(',')
+      @prior_search_path = self.search_path
+      ActiveRecord::Base.connection.schema_search_path = "#{path_parts.join(',')}"
     rescue Exception => e
+      restore_search_path
       raise PgActiveSchema::NoSchema.new(e.message)
     end
   end
@@ -109,16 +126,22 @@ class PgActiveSchema
     create_schema name
     self.search_path = name
 
-    #right from db:schema:load rake task
-    file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/schema.rb"
-    if File.exists?(file)
-      load(file)
+    #double check to make sure the search path was set
+    if self.search_path == name
+      #right from db:schema:load rake task
+      file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/schema.rb"
+      if File.exists?(file)
+        load(file)
+      else
+        abort %{#{file} vendor/plugins/pg_active_schema/db/schema.rb doesn't exist."}
+      end
+      file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/seeds.rb"
+      if File.exists?(file)
+        load(file)
+      end
     else
-      abort %{#{file} vendor/plugins/pg_active_schema/db/schema.rb doesn't exist."}
-    end
-    file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/seeds.rb"
-    if File.exists?(file)
-      load(file)
+      restore_search_path
+      raise PgActiveSchema::SchemaNotCreatedWithTenant
     end
 
     restore_search_path

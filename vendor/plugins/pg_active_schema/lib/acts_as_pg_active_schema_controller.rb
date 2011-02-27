@@ -27,6 +27,13 @@ module ActsAsPgActiveSchemaController
         return request.subdomain
       end
     end
+
+    def schema_to_current_tenant
+      PgActiveSchema.search_path = current_tenant
+    end
+    def schema_to_default
+      PgActiveSchema.default_search_path
+    end
   end
 
 end
