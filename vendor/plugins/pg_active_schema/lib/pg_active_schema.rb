@@ -40,7 +40,7 @@ module SchemaStatementsPatch
         # File activerecord/lib/active_record/schema.rb, line 35
         def migrations_path
           'vendor/plugins/pg_active_schema/db/migrate'
-        end
+        end 
       end
   end
 end
