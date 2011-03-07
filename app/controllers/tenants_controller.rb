@@ -1,5 +1,6 @@
 class TenantsController < ApplicationController
   before_filter {PgActiveSchema.default_search_path}
+  after_filter {PgActiveSchema.default_search_path}
 
   def index
     @tenants = Tenant.all

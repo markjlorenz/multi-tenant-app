@@ -1,0 +1,7 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: marks-multitenant
+  pool: 5
+  username: postgres
+  password: postgresql
