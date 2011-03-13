@@ -1,0 +1,4 @@
+source "http://rubygems.org"
+
+# Specify your gem's dependencies in pg_active_schema.gemspec
+gemspec

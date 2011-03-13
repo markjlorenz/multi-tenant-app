@@ -1,0 +1,60 @@
+Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
+
+C:\Documents and Settings\Ed>cd C:\rails_project1\task-man
+
+C:\rails_project1\task-man>rake db:migrate
+(in C:/rails_project1/task-man)
+rake aborted!
+can't convert Rake::FileTask into String
+
+(See full trace by running task with --trace)
+
+C:\rails_project1\task-man>cd C:\rails_project1\multi-tenant-app
+
+C:\rails_project1\multi-tenant-app>bundle install
+Fetching source index for http://rubygems.org/
+Using rake (0.8.7)
+Using abstract (1.0.0)
+Using activesupport (3.0.4)
+Using builder (2.1.2)
+Using i18n (0.5.0)
+Using activemodel (3.0.4)
+Using erubis (2.6.6)
+Using rack (1.2.1)
+Using rack-mount (0.6.13)
+Using rack-test (0.5.7)
+Using tzinfo (0.3.24)
+Using actionpack (3.0.4)
+Using mime-types (1.16)
+Using polyglot (0.3.1)
+Using treetop (1.4.9)
+Using mail (2.2.15)
+Using actionmailer (3.0.4)
+Using arel (2.0.9)
+Using activerecord (3.0.4)
+Using activeresource (3.0.4)
+Using bundler (1.0.7)
+Using pg (0.9.0)
+Using thor (0.14.6)
+Using railties (3.0.4)
+Using rails (3.0.4)
+Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem
+is installed.
+
+C:\rails_project1\multi-tenant-app>rake db:create
+(in C:/rails_project1/multi-tenant-app)
+
+C:\rails_project1\multi-tenant-app>rake db:migrate
+(in C:/rails_project1/multi-tenant-app)
+==  CreateTenants: migrating ==================================================
+-- create_table(:tenants)
+NOTICE:  CREATE TABLE will create implicit sequence "tenants_id_seq" for serial
+column "tenants.id"
+NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "tenants_pkey" fo
+r table "tenants"
+   -> 0.1406s
+==  CreateTenants: migrated (0.1406s) =========================================
+
+
+C:\rails_project1\multi-tenant-app>
