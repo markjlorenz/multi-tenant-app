@@ -1,0 +1,8 @@
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/**/*
+<<<<<<< HEAD
+config/database.yml
+=======
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe

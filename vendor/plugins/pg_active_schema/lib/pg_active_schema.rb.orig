@@ -30,6 +30,7 @@ module PostgresAdapterPatch
   end
 end
 
+<<<<<<< HEAD
 # this monkey patch is needed because the location of the migrations `db/migrate` is effectively hard coded into the rails source
 # Rails team has no intent of changing this: https://rails.lighthouseapp.com/projects/8994/tickets/343-assume_migrated_upto_version-doesn-t-work-with-non-standard-migrations-path
 # If I understand correctly, this alias won't be available outside of code that doesn't require the migration
@@ -40,7 +41,7 @@ module SchemaStatementsPatch
         # File activerecord/lib/active_record/schema.rb, line 35
         def migrations_path
           'vendor/plugins/pg_active_schema/db/migrate'
-        end
+        end 
       end
   end
 end
@@ -49,8 +50,13 @@ class PgActiveSchema
   include PostgresAdapterPatch
   include SchemaStatementsPatch
   class NoSchema < StandardError; end
-  class SQLInjectableSchemaName < StandardError; end
   class SchemaNotCreatedWithTenant < StandardError; end
+=======
+class PgActiveSchema
+  include PostgresAdapterPatch
+
+  class NoSchema < StandardError; end
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
   class CreateSchemaError < StandardError
     attr_reader :search_path
     def initialize(message = nil, search_path = nil)
@@ -66,17 +72,20 @@ class PgActiveSchema
     end
   end
 
-  def self.assert_safe_schema_name name
-    raise PgActiveSchema::SQLInjectableSchemaName.new("Schema name #{name} is subject to inject attack") if name.match(/(^[A-Za-z]+[A-Za-z0-9]*$|\$user)/).nil?
-  end
+<<<<<<< HEAD
 
-  #name will be sanitized by this method
+=======
+  
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
   def self.create_schema name
-    assert_safe_schema_name name
     begin
       ActiveRecord::Base.connection.execute("CREATE SCHEMA #{name}")
     rescue Exception => e
+<<<<<<< HEAD
       #drop_schema name if list_schemata.include?(name) #dont' want a 1/2 finished schema hanging around
+=======
+      drop_schema name if list_schemata.include?(name) #dont' want a 1/2 finished schema hanging around
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
       raise PgActiveSchema::CreateSchemaError.new(e.message, search_path)
     end
   end
@@ -100,77 +109,51 @@ class PgActiveSchema
   def self.current_schema
     ActiveRecord::Base.connection.query('select current_schema();')[0].first
   end
+<<<<<<< HEAD
+
+=======
   
-  #reset_models an array of contants of classes that will need to be reloaded, if you have the same table name with different attribtes in different schemas
-  #def self.search_path= name, include_public=false  #origonal method sig...doesn't work the way you think it does
-  def self.search_path= name
-    assert_safe_schema_name name
-    #path_parts = [name, ("public" if include_public)].compact
-    path_parts = name
-    #Rails.logger.info "--Setting search path to: " + path_parts.join(',')
-    Rails.logger.info "--Setting search path to: " + path_parts
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
+  def self.search_path= name, include_public=false
+    path_parts = [name, ("public" if include_public)].compact
+    Rails.logger.info "--Setting search path to: " + path_parts.join(',')
     begin
       #this will throw `ActiveRecord::StatementInvalid` if the search path doesn't exist
       #http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/PostgreSQLAdapter.html#method-i-schema_search_path-3D
       #says not to call this directly, but internally it's doing the same thing I was going to do anyway
+<<<<<<< HEAD
       @prior_search_path = self.search_path
-      #ActiveRecord::Base.connection.schema_search_path = "#{path_parts.join(',')}"
-      ActiveRecord::Base.connection.schema_search_path = "#{path_parts}"
+      ActiveRecord::Base.connection.schema_search_path = "#{path_parts.join(',')}"
     rescue Exception => e
       restore_search_path
+=======
+      @prior_search_path = search_path
+      ActiveRecord::Base.connection.schema_search_path = path_parts.join(',')
+    rescue Exception => e
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
       raise PgActiveSchema::NoSchema.new(e.message)
     end
   end
 
   def self.restore_search_path
-    self.search_path= @prior_search_path
+    self.search_path = @prior_search_path
   end
 
-  def self.default_search_path 
-    self.search_path= '"$user",public'
-  end
-
-  def self.set_search_path_and_reset name, reset_models = []
-    assert_safe_schema_name name
-    path_parts = name
-    #Rails.logger.info "--Setting search path to: " + path_parts.join(',')
-    Rails.logger.info "--Setting search path to: " + path_parts
-    begin
-      #this will throw `ActiveRecord::StatementInvalid` if the search path doesn't exist
-      #http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/PostgreSQLAdapter.html#method-i-schema_search_path-3D
-      #says not to call this directly, but internally it's doing the same thing I was going to do anyway
-      @prior_search_path = self.search_path
-      #ActiveRecord::Base.connection.schema_search_path = "#{path_parts.join(',')}"
-      ActiveRecord::Base.connection.schema_search_path = "#{path_parts}"
-      reset_models.each{|model| model.reset_column_information}
-    rescue Exception => e
-      restore_search_path
-      reset_models.each{|model| model.reset_column_information}
-      raise PgActiveSchema::NoSchema.new(e.message)
-    end
-  end
-  def self.restore_search_path_and_reset reset_models=[]  
-    self.set_search_path_and_reset @prior_search_path, reset_models
-  end
-
-  def self.default_search_path_and_reset reset_models=[]  
-    self.set_search_path_and_reset '"$user",public', reset_models
+  def self.default_search_path
+    self.search_path = '"$user",public'
   end
 
   #run this to create a new tenant, and initialize with the 'authorative' schema in pg_active_schema/db/schema.rb
   #this plugin schema will have to be managed by hand for now
   #the version listed there should represent our desired latest migration.  The `schema_migrations table` in each postgres schema
   #will tell us whether or not those migrations where actually applied, incase there was some kind of failure.
-  #initializes from db seeds and also takes a block if you have special seeding to do
-  #pass a proc as a block by &my_proc_name
-  #pass an array of contants of classes that will need to be reloaded, if you have the same table name with different attribtes in different schemas
-  def self.create_tenant name, reset_models = []
+  def self.create_tenant name
     create_schema name
-    #self.search_path = name
-    self.set_search_path_and_reset name, reset_models
+    self.search_path = name
 
-    raise PgActiveSchema::SchemaNotCreatedWithTenant.new("search path(#{self.search_path}) does not equal tenant name (#{name})") unless self.search_path == name #double check to make sure the search path was set
-    begin #need to catch any errors that happen here or else the database will be left on the user's schema
+<<<<<<< HEAD
+    #double check to make sure the search path was set
+    if self.search_path == name
       #right from db:schema:load rake task
       file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/schema.rb"
       if File.exists?(file)
@@ -182,20 +165,24 @@ class PgActiveSchema
       if File.exists?(file)
         load(file)
       end
-
-      if block_given?
-        yield
-      end
-    rescue Exception => e
-      restore_search_path_and_reset reset_models
-      raise PgActiveSchema::SchemaNotCreatedWithTenant.new(e.message)
+    else
+      restore_search_path
+      raise PgActiveSchema::SchemaNotCreatedWithTenant
+=======
+    #right from db:schema:load rake task
+    file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/schema.rb"
+    if File.exists?(file)
+      load(file)
+    else
+      abort %{#{file} vendor/plugins/pg_active_schema/db/schema.rb doesn't exist."}
     end
-  #else
-  #  restore_search_path
-  #  raise PgActiveSchema::SchemaNotCreatedWithTenant
-  #end
+    file = "#{Rails.root}/vendor/plugins/pg_active_schema/db/seeds.rb"
+    if File.exists?(file)
+      load(file)
+>>>>>>> 47c909b51c148d94b65186cae1f836a2799aa2fe
+    end
 
-    restore_search_path_and_reset reset_models
+    restore_search_path
   end
 
   #use this to get rid of tenants (i.e. the tenants schema)
